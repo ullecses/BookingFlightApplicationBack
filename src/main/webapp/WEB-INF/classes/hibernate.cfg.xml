@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- JDBC URL, пользователь и пароль -->
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/FlightBooking</property>
+        <property name="hibernate.connection.username">builder</property>
+        <property name="hibernate.connection.password">656565</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+
+        <!-- Dialect для PostgreSQL -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+
+        <!-- Пул соединений -->
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.timeout">300</property>
+        <property name="hibernate.c3p0.max_statements">50</property>
+        <property name="hibernate.c3p0.idle_test_period">3000</property>
+
+        <!-- Автоматическое создание таблиц (опционально, для разработки) -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Логирование SQL-запросов (опционально) -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+
+        <!-- Укажите Entity-классы -->
+        <mapping class="org.flightbooking.models.User"/>
+        <mapping class="org.flightbooking.models.Flight"/>
+        <mapping class="org.flightbooking.models.Ticket"/>
+        <mapping class="org.flightbooking.models.Booking"/>
+
+    </session-factory>
+</hibernate-configuration>
