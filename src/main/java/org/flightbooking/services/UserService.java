@@ -2,10 +2,12 @@ package org.flightbooking.services;
 
 import jakarta.persistence.EntityManager;
 import org.flightbooking.dao.UserDao;
+import org.flightbooking.models.Flight;
 import org.flightbooking.models.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.List;
+import java.util.Map;
 
 public class UserService {
 
@@ -35,6 +37,10 @@ public class UserService {
 
     public User updateUser(User user) {
         return userDao.update(user);
+    }
+
+    public User updateUserPartial(Long userId, Map<String, Object> updates) {
+        return userDao.updatePartial(userId, updates);
     }
 
     public void deleteUser(Long id) {
