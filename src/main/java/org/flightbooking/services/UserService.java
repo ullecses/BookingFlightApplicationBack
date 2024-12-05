@@ -3,6 +3,7 @@ package org.flightbooking.services;
 import jakarta.persistence.EntityManager;
 import org.flightbooking.dao.UserDao;
 import org.flightbooking.models.User;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.List;
 
@@ -14,18 +15,18 @@ public class UserService {
         this.userDao = new UserDao(entityManager);
     }
 
-    public User createUser(String firstName, String lastName, String email, String password) {
-        User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        user.setPassword(password);
-
+    public User createUser(User user) {
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+        user.setPassword(hashedPassword);
         return userDao.create(user);
     }
 
     public User getUserById(Long id) {
         return userDao.findById(id);
+    }
+
+    public User getUserByEmail(String email) {
+        return userDao.findByEmail(email);
     }
 
     public List<User> getAllUsers() {
@@ -38,5 +39,9 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userDao.delete(id);
+    }
+
+    public boolean verifyPassword(String rawPassword, String hashedPassword) {
+        return BCrypt.checkpw(rawPassword, hashedPassword);
     }
 }

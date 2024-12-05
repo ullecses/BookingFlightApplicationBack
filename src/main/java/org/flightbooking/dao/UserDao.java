@@ -31,6 +31,10 @@ public class UserDao {
         return entityManager.find(User.class, id);
     }
 
+    public User findByEmail(String email) {
+        return entityManager.find(User.class, email);
+    }
+
     public List<User> findAll() {
         return entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
     }
@@ -48,7 +52,7 @@ public class UserDao {
         }
     }
 
-    public void delete(Long id) {
+    public boolean delete(Long id) {
         EntityTransaction transaction = entityManager.getTransaction();
         try {
             transaction.begin();
@@ -61,6 +65,7 @@ public class UserDao {
             transaction.rollback();
             throw e;
         }
+        return false;
     }
 }
 

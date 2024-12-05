@@ -5,6 +5,7 @@ import org.flightbooking.dao.FlightDao;
 import org.flightbooking.models.Flight;
 
 import java.util.List;
+import java.util.Map;
 
 public class FlightService {
 
@@ -14,9 +15,12 @@ public class FlightService {
         this.flightDao = new FlightDao(entityManager);
     }
 
-    public Flight createFlight(int flightNumber, String origin, String destination, double price, String departureTime, String arrivalTime) {
-        Flight flight = new Flight(null, flightNumber, origin, destination, price, departureTime, arrivalTime);
+    public Flight createFlight(Flight flight) {
         return flightDao.create(flight);
+    }
+
+    public Flight updateFlightPartial(Long flightId, Map<String, Object> updates) {
+        return flightDao.updatePartial(flightId, updates);
     }
 
     public Flight getFlightById(Long id) {
