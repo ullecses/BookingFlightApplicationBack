@@ -25,6 +25,7 @@ import java.util.logging.Logger;
  * - Fetching all flights or a flight by ID (GET)
  * - Creating a new flight (POST)
  * - Updating flight data (PUT)
+ * - Updating flight data (PATCH)
  * - Deleting a flight (DELETE)
  */
 @WebServlet("/flights/*")
@@ -137,32 +138,8 @@ public class FlightServlet extends HttpServlet {
     }
 
     /**
-     * Handles DELETE requests to remove a flight by ID.
+     * Handles HTTP PATCH requests to partially update a flight.
      */
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        LOGGER.info("Processing DELETE request...");
-        resp.setContentType("application/json");
-        PrintWriter out = resp.getWriter();
-        String pathInfo = req.getPathInfo();
-
-        try {
-            Long flightId = extractIdFromPath(pathInfo);
-            if (flightId == null) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"error\":\"Invalid flight ID\"}");
-                LOGGER.warning("Invalid flight ID in DELETE path: " + pathInfo);
-                return;
-            }
-            flightService.deleteFlight(flightId);
-            LOGGER.info("Deleted flight with ID: " + flightId);
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error processing DELETE request", e);
-            handleException(resp, e);
-        }
-    }
-
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LOGGER.info("Processing PATCH request...");
@@ -170,7 +147,6 @@ public class FlightServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
 
         try {
-            // Чтение ID из пути запроса
             String pathInfo = req.getPathInfo();
             if (pathInfo == null || pathInfo.equals("/")) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -205,6 +181,33 @@ public class FlightServlet extends HttpServlet {
             LOGGER.warning("Invalid Flight ID format in PATCH request");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing PATCH request", e);
+            handleException(resp, e);
+        }
+    }
+
+    /**
+     * Handles DELETE requests to remove a flight by ID.
+     */
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        LOGGER.info("Processing DELETE request...");
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+        String pathInfo = req.getPathInfo();
+
+        try {
+            Long flightId = extractIdFromPath(pathInfo);
+            if (flightId == null) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"error\":\"Invalid flight ID\"}");
+                LOGGER.warning("Invalid flight ID in DELETE path: " + pathInfo);
+                return;
+            }
+            flightService.deleteFlight(flightId);
+            LOGGER.info("Deleted flight with ID: " + flightId);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error processing DELETE request", e);
             handleException(resp, e);
         }
     }

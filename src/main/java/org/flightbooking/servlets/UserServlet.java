@@ -1,5 +1,6 @@
 package org.flightbooking.servlets;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -9,12 +10,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.flightbooking.HibernateUtil;
+import org.flightbooking.models.Flight;
 import org.flightbooking.models.User;
 import org.flightbooking.services.UserService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +26,7 @@ import java.util.logging.Logger;
  * - Fetching all users or a user by ID (GET)
  * - Creating a new user (POST)
  * - Updating user data (PUT)
+ * - Updating user data (PATCH)
  * - Deleting a user (DELETE)
  */
 @WebServlet("/users/*")
@@ -130,6 +134,54 @@ public class UserServlet extends HttpServlet {
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing PUT request", e);
+            handleException(resp, e);
+        }
+    }
+
+    /**
+     * Handles HTTP PATCH requests to partially update a user.
+     */
+    @Override
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        LOGGER.info("Processing PATCH request...");
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+
+        try {
+            String pathInfo = req.getPathInfo();
+            if (pathInfo == null || pathInfo.equals("/")) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"error\":\"Flight ID is required\"}");
+                return;
+            }
+
+            String[] pathParts = pathInfo.split("/");
+            if (pathParts.length < 2 || pathParts[1].isEmpty()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"error\":\"Invalid Flight ID\"}");
+                return;
+            }
+
+            Long userId = Long.parseLong(pathParts[1]);
+
+            Map<String, Object> updates = objectMapper.readValue(req.getReader(), new TypeReference<Map<String, Object>>() {});
+
+            User updatedUser = userService.updateUserPartial(userId, updates);
+
+            if (updatedUser != null) {
+                LOGGER.info("Partially updated flight: " + updatedUser.getId());
+                out.print(objectMapper.writeValueAsString(updatedUser));
+            } else {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                out.print("{\"error\":\"Flight not found\"}");
+                LOGGER.warning("Flight not found for partial update: " + userId);
+            }
+        } catch (NumberFormatException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.print("{\"error\":\"Invalid Flight ID format\"}");
+            LOGGER.warning("Invalid Flight ID format in PATCH request");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error processing PATCH request", e);
             handleException(resp, e);
         }
     }
